@@ -1,16 +1,13 @@
 package com.aedn.service;
 
 
-import java.util.HashSet;
-import java.util.Set;
-import java.util.UUID;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import com.aedn.dto.ExampleDto;
-import com.aedn.entity.ExampleEntity;
+import com.aedn.entity.Example;
 import com.aedn.repository.ExampleRepository;
 
 @Service
@@ -24,9 +21,9 @@ public class ExampleService {
     }
 
     public ExampleDto getExample() {
-        ExampleEntity something = exampleRepository.example();
+        Optional<Example> entity = exampleRepository.findFirstBy();
 
-        return ExampleDto.fromEntity(something);
+        return entity.map(ExampleDto::fromEntity).orElse(null);
     }
 
 
