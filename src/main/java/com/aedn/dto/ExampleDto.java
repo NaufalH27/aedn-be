@@ -4,7 +4,7 @@ package com.aedn.dto;
 import java.util.Collections;
 import java.util.List;
 
-import com.aedn.entity.ExampleEntity;
+import com.aedn.entity.Example;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -17,7 +17,7 @@ public class ExampleDto {
     private float aFloat;
     private List<String> listOfStrings;
 
-    public static ExampleDto fromEntity(ExampleEntity entity) {
+    public static ExampleDto fromEntity(Example entity) {
         if (entity == null) return null;
 
         ExampleDto dto = new ExampleDto();
