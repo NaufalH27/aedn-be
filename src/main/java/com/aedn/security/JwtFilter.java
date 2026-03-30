@@ -1,9 +1,7 @@
 package com.aedn.security;
 
 import java.io.IOException;
-import java.time.Instant;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -11,7 +9,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import com.aedn.common.ApiResponse;
-import com.aedn.security.JwtUserPrincipal;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.jsonwebtoken.Claims;
@@ -43,7 +40,6 @@ public class JwtFilter extends OncePerRequestFilter {
             HttpServletResponse response,
             FilterChain filterChain
     ) throws ServletException, IOException {
-
         String authHeader = request.getHeader("Authorization");
 
         if (authHeader != null && authHeader.startsWith("Bearer ")) {
@@ -78,21 +74,15 @@ public class JwtFilter extends OncePerRequestFilter {
                 SecurityContext securityContext = SecurityContextHolder.getContext();
                 securityContext.setAuthentication(authentication);
             } catch(JwtException e) {
-                response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
                 response.setContentType("application/json");
                 response.setCharacterEncoding("UTF-8");
                 ApiResponse<Void> invalidResponse = ApiResponse.failure("Invalid Jwt session", "JwtError", e.getMessage());
 
                 response.getWriter().write(this.objectMapper.writeValueAsString(invalidResponse));
                 return;
-                
-
             }
-
-
         }
-
-
         filterChain.doFilter(request, response);
     }
 }

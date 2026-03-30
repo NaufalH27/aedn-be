@@ -33,10 +33,11 @@ public class JwtConfig {
     @PostConstruct
     public void init() {
         if (secretKey == null || secretKey.isBlank()) {
-            secretKey = generateSecret();
+            this.secretKey = generateSecret();
             log.warn("JWT secret not found in configuration. Generated a temporary one.");
         }
-        this.key = Keys.hmacShaKeyFor(secretKey.getBytes(StandardCharsets.UTF_8));
+        byte[] keyBytes = Base64.getDecoder().decode(secretKey);
+        this.key = Keys.hmacShaKeyFor(keyBytes);
     }
 
     private String generateSecret() {
