@@ -8,8 +8,6 @@ import org.springframework.web.bind.annotation.RestController;
 import com.aedn.dto.ExampleDto;
 import com.aedn.service.ExampleService;
 
-import org.springframework.security.access.prepost.PreAuthorize;
-
 @RestController
 public class ExampleController {
     private final ExampleService exampleService;
