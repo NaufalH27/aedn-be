@@ -23,21 +23,26 @@ public class JwtConfig {
     private static final Logger log = LoggerFactory.getLogger(JwtConfig.class);
 
     @Value("${jwt.secret:}")
-    private String secretKey;
+    private String key;
 
     @Value("${jwt.expiration:3600000}")
     private long expirationTime;
 
-    private SecretKey key;
+    private SecretKey secretKey;
 
     @PostConstruct
     public void init() {
-        if (secretKey == null || secretKey.isBlank()) {
-            this.secretKey = generateSecret();
-            log.warn("JWT secret not found in configuration. Generated a temporary one.");
+        if (key == null || key.isBlank()) {
+            this.key = generateSecret();
+            log.warn("JWT secret not found in configuration. Generated a temporary one. if you see this warning in production, please set up your jwt secret key in .env. for example: JWT_SECRET_KEY=my-secret-key");
         }
-        byte[] keyBytes = Base64.getDecoder().decode(secretKey);
-        this.key = Keys.hmacShaKeyFor(keyBytes);
+
+        try {
+            byte[] keyBytes = Base64.getDecoder().decode(key);
+            this.secretKey = Keys.hmacShaKeyFor(keyBytes);
+        } catch (IllegalArgumentException e) {
+            throw new IllegalStateException("Invalid jwt.secret: must be a valid Base64-encoded key", e);
+        }
     }
 
     private String generateSecret() {
