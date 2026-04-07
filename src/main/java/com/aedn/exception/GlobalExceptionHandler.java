@@ -5,6 +5,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.security.authorization.AuthorizationDeniedException;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
@@ -19,6 +22,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiResponse<Object>> handleGeneric(Exception e) {
+        log.error("INTERNAL SERVER ERROR", e);
         ApiResponse<Object> response = ApiResponse.failure(
                 "Something went wrong Unexpectedly",
                 "INTERNAL_SERVER_ERROR",
@@ -66,6 +70,36 @@ public ResponseEntity<ApiResponse<Object>> handleDataIntegrity(DataIntegrityViol
         ApiResponse<Object> response = ApiResponse.failure(
                 "User login failed",
                 "USER_LOGIN_ERROR",
+                e.getMessage()
+        );
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+    }
+
+    @ExceptionHandler(AuthorizationDeniedException.class)
+    public ResponseEntity<ApiResponse<Object>> handleAccessDenied(AuthorizationDeniedException e) {
+        ApiResponse<Object> response = ApiResponse.failure(
+                "Access denied",
+                "FORBIDDEN",
+                e.getMessage()
+        );
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(response);
+    }
+
+    @ExceptionHandler(AuthenticationException.class)
+    public ResponseEntity<ApiResponse<Object>> handleAuth(AuthenticationException e) {
+        ApiResponse<Object> response = ApiResponse.failure(
+                "Authentication required",
+                "UNAUTHORIZED",
+                e.getMessage()
+        );
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
+    }
+
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity<ApiResponse<Object>> handleMissingRequestBody(HttpMessageNotReadableException e) {
+        ApiResponse<Object> response = ApiResponse.failure(
+                "invalid or empty request body",
+                "REQUEST_BODY_EXCEPTION",
                 e.getMessage()
         );
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);

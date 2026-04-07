@@ -6,10 +6,9 @@ import org.springframework.security.config.annotation.method.configuration.Enabl
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.servlet.HandlerExceptionResolver;
 
 import com.aedn.security.JwtFilter;
-import com.aedn.security.CustomAuthenticationEntryPoint;
-import com.aedn.security.CustomAccessDeniedHandler;
 
 import lombok.RequiredArgsConstructor;
 
@@ -19,19 +18,22 @@ import lombok.RequiredArgsConstructor;
 public class SecurityConfig {
 
     private final JwtFilter jwtFilter;
-    private final CustomAccessDeniedHandler customAccessDeniedHandler;
-    private final CustomAuthenticationEntryPoint customAuthenticationEntryPoint;
+    private final HandlerExceptionResolver handlerExceptionResolver;
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
             .csrf(csrf -> csrf.disable())
-            .authorizeHttpRequests(auth -> auth.anyRequest().permitAll())
-.exceptionHandling(ex -> ex
-                .authenticationEntryPoint(customAuthenticationEntryPoint)
-                .accessDeniedHandler(customAccessDeniedHandler)
-            )
-            .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
+            .authorizeHttpRequests(auth -> auth
+                    .requestMatchers("/auth/**").permitAll()
+                    )
+            .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
+            .exceptionHandling((exceptionHandling) ->
+                exceptionHandling.authenticationEntryPoint((request, response, authException) -> {
+                    handlerExceptionResolver.resolveException(request, response, null, authException);
+                    return;
+                })
+            );
         return http.build();
     }
 }

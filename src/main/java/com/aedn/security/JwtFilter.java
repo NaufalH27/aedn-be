@@ -9,9 +9,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 import org.springframework.web.servlet.HandlerExceptionResolver;
 
-import com.aedn.common.ApiResponse;
-import com.fasterxml.jackson.databind.ObjectMapper;
-
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
 
@@ -33,7 +30,6 @@ import lombok.AllArgsConstructor;
 public class JwtFilter extends OncePerRequestFilter {
 
     private final JwtHelper jwtHelper;
-    private final ObjectMapper objectMapper;
     private final HandlerExceptionResolver handlerExceptionResolver;
 
     @Override
@@ -77,12 +73,6 @@ public class JwtFilter extends OncePerRequestFilter {
                 securityContext.setAuthentication(authentication);
             } catch(JwtException e) {
                 handlerExceptionResolver.resolveException(request, response, null, e);
-                // response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-                // response.setContentType("application/json");
-                // response.setCharacterEncoding("UTF-8");
-                // ApiResponse<Void> invalidResponse = ApiResponse.failure("Invalid Jwt session", "JwtError", e.getMessage());
-                //
-                // response.getWriter().write(this.objectMapper.writeValueAsString(invalidResponse));
                 return;
             }
         }
