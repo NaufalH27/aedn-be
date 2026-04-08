@@ -1,6 +1,5 @@
 package com.aedn.controller;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -9,20 +8,20 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.aedn.common.ApiResponse;
 import com.aedn.dto.LoginDto;
+import com.aedn.dto.RefreshTokenDto;
 import com.aedn.dto.SignUpDto;
 import com.aedn.dto.TokenDto;
 import com.aedn.dto.UserDto;
 import com.aedn.service.AuthService;
 
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 
 @RestController
-@AllArgsConstructor
+@RequiredArgsConstructor
 @RequestMapping(path = "/auth")
 public class AuthController {
 
-    @Autowired
-    private AuthService authService;
+    private final AuthService authService;
 
     @PostMapping("/login")
     public ResponseEntity<ApiResponse<TokenDto>> login(@RequestBody LoginDto form) {
@@ -32,5 +31,10 @@ public class AuthController {
     @PostMapping("/signup")
     public ResponseEntity<ApiResponse<UserDto>> signup(@RequestBody SignUpDto form) {
         return ResponseEntity.ok(ApiResponse.success("Sign Up Success", authService.createUser(form)));
+    }
+
+    @PostMapping("/refresh-token")
+    public ResponseEntity<ApiResponse<TokenDto>> refreshToken(@RequestBody RefreshTokenDto dto) {
+        return ResponseEntity.ok(ApiResponse.success("Refresh Token Success", authService.refreshToken(dto)));
     }
 }

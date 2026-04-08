@@ -1,5 +1,7 @@
 package com.aedn.dto;
 
+import java.util.UUID;
+
 import com.aedn.entity.User;
 
 import lombok.Getter;
@@ -9,6 +11,7 @@ import lombok.Setter;
 @Setter
 public class UserDto {
 
+    private UUID id;
     private String username;
     private String email;
     private String fullName;
@@ -20,6 +23,7 @@ public class UserDto {
         if (entity == null) return null;
 
         UserDto dto = new UserDto();
+        dto.setId(entity.getId());
         dto.setUsername(entity.getUsername());
         dto.setEmail(entity.getEmail());
         dto.setFullName(entity.getFullName());

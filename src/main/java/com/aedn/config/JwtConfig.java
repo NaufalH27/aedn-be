@@ -1,7 +1,7 @@
 package com.aedn.config;
 
-import java.nio.charset.StandardCharsets;
 import java.security.SecureRandom;
+import java.time.Duration;
 import java.util.Base64;
 
 import javax.crypto.SecretKey;
@@ -25,8 +25,11 @@ public class JwtConfig {
     @Value("${jwt.secret:}")
     private String key;
 
-    @Value("${jwt.expiration:3600000}")
-    private long expirationTime;
+    @Value("${jwt.expiration:5m}")
+    private Duration expirationTime;
+
+    @Value("${jwt.refresh.expiration:30d}")
+    private Duration refreshTokenExpirationTime;
 
     private SecretKey secretKey;
 

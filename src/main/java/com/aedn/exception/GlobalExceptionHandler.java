@@ -51,20 +51,31 @@ public class GlobalExceptionHandler {
 
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(body);
     }
+    @ExceptionHandler(UserRefreshTokenException.class)
+    public ResponseEntity<ApiResponse<Void>> handleRefreshTokenException(UserRefreshTokenException e) {
+        ApiResponse<Void> body = ApiResponse.failure(
+                "Invalid Refresh Token",
+                "INVALID_REFRESH_TOKEN",
+                e.getMessage()
+                );
 
-@ExceptionHandler(DataIntegrityViolationException.class)
-public ResponseEntity<ApiResponse<Object>> handleDataIntegrity(DataIntegrityViolationException e) {
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(body);
+    }
 
-    log.error("Unhandled DataIntegrityViolationException, note for dev: make sure to handle the exception before reach the database.", e);
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ResponseEntity<ApiResponse<Object>> handleDataIntegrity(DataIntegrityViolationException e) {
 
-    ApiResponse<Object> response = ApiResponse.failure(
-            "A database constraint was violated",
-            "DATABASE_CONSTRAINT_ERROR",
-            "note for dev: make sure to handle the exception before reach the database. there is unhandled exception related to database"
-    );
+        log.error("Unhandled DataIntegrityViolationException, note for dev: make sure to handle the exception before reach the database.", e);
 
-    return ResponseEntity.status(HttpStatus.CONFLICT).body(response);
-}
+        ApiResponse<Object> response = ApiResponse.failure(
+                "A database constraint was violated",
+                "DATABASE_CONSTRAINT_ERROR",
+                "note for dev: make sure to handle the exception before reach the database. there is unhandled exception related to database"
+                );
+
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(response);
+    }
+
     @ExceptionHandler(UserLoginException.class)
     public ResponseEntity<ApiResponse<Object>> handleLogin(UserLoginException e) {
         ApiResponse<Object> response = ApiResponse.failure(
