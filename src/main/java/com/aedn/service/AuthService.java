@@ -97,7 +97,7 @@ public class AuthService {
         Instant expiration = Instant.now().plus(jwtConfig.getRefreshTokenExpirationTime());
 
         RefreshToken refreshToken = refreshTokenRepository.save(new RefreshToken(base64token, userId, expiration));
-        return new TokenDto(refreshToken.getToken(), jwtToken);
+        return new TokenDto(jwtToken, refreshToken.getToken());
     }
 
     private boolean compareBcrypt(String plain, String hashed) {
