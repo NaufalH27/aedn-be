@@ -8,8 +8,11 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.security.authorization.AuthorizationDeniedException;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.servlet.NoHandlerFoundException;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 import com.aedn.common.ApiResponse;
 
@@ -29,6 +32,36 @@ public class GlobalExceptionHandler {
                 e.getMessage()
         );
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+    }
+
+    @ExceptionHandler(NoHandlerFoundException.class)
+    public ResponseEntity<ApiResponse<Object>> handleNotFound(NoHandlerFoundException e) {
+        ApiResponse<Object> response = ApiResponse.failure(
+                "404 - Not Found",
+                "NOT_FOUND",
+                e.getMessage()
+        );
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+    }
+    
+    @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
+    public ResponseEntity<ApiResponse<Object>> handleMethodNotSupported(HttpRequestMethodNotSupportedException e) {
+        ApiResponse<Object> response = ApiResponse.failure(
+                "405 - Method not allowed",
+                "METHOD_NOT_ALLOWED",
+                e.getMessage()
+        );
+        return ResponseEntity.status(HttpStatus.METHOD_NOT_ALLOWED).body(response);
+    }
+
+    @ExceptionHandler(NoResourceFoundException.class)
+    public ResponseEntity<ApiResponse<Object>> handleResourceNotFound(NoResourceFoundException e) {
+        ApiResponse<Object> response = ApiResponse.failure(
+                "404 - Not Found",
+                "NOT_FOUND",
+                e.getMessage()
+        );
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
     }
 
     @ExceptionHandler(UserCreationException.class)
@@ -70,7 +103,7 @@ public class GlobalExceptionHandler {
         ApiResponse<Object> response = ApiResponse.failure(
                 "A database constraint was violated",
                 "DATABASE_CONSTRAINT_ERROR",
-                "note for dev: make sure to handle the exception before reach the database. there is unhandled exception related to database"
+                "Database integrity and constraint unhandled"
                 );
 
         return ResponseEntity.status(HttpStatus.CONFLICT).body(response);
