@@ -1,7 +1,6 @@
 package com.aedn.security;
 
 import java.util.Date;
-import java.util.List;
 import java.util.UUID;
 
 import org.springframework.stereotype.Component;
@@ -24,7 +23,7 @@ public class JwtHelper {
                 .subject(id.toString())
                 .claim("username", username)
                 .issuedAt(now)
-                .expiration(new Date(now.getTime() + jwtConfig.getExpirationTime()))
+                .expiration(new Date(now.getTime() + jwtConfig.getExpirationTime().toMillis()))
                 .signWith(jwtConfig.getSecretKey())
                 .compact();
     }
@@ -38,5 +37,4 @@ public class JwtHelper {
             .parseSignedClaims(token)
             .getPayload();
     }
-
 }
