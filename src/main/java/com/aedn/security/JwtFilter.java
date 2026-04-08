@@ -46,8 +46,9 @@ public class JwtFilter extends OncePerRequestFilter {
             try {
                 Claims claims = jwtHelper.parseToken(token);
 
-                String username = claims.getSubject();
+                String userId = claims.getSubject();
                 String email = claims.get("email", String.class);
+                String username = claims.get("username", String.class);
                 Object rolesObj = claims.get("roles");
                 List<String> roles = new ArrayList<>();
 
@@ -62,7 +63,7 @@ public class JwtFilter extends OncePerRequestFilter {
                     .collect(Collectors.toList());
 
                 UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
-                        new JwtUserPrincipal(username, email),
+                        new JwtUserPrincipal(userId,username /* , email */),
                         null,
                         authorities);
 
