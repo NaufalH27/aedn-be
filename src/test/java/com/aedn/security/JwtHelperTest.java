@@ -5,7 +5,10 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.time.Duration;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.UUID;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -28,7 +31,8 @@ class JwtHelperTest {
     void setUp() {
         this.jwtConfig = new JwtConfig(); 
         jwtConfig.setKey("uvlEeKcfCmGtkcXYs7VwVvvvcKcLJIQREJaId91sFc93/leLPUz/bVI8dDBNg8IhPY5RJzTGV5EmmPL7dPiMXw==");
-        jwtConfig.setExpirationTime(3600);
+        Duration exp = Duration.ofMinutes(5);
+        jwtConfig.setExpirationTime(exp);
         jwtConfig.init();
         this.jwtHelper = new JwtHelper(this.jwtConfig);
 
@@ -40,8 +44,11 @@ class JwtHelperTest {
     @Test
     void validJwt() {
         String username = "amogus67";
+        String email = "amogus67@aedn.com";
         UUID id = UUID.randomUUID();
-        String token = jwtHelper.generateToken(id, username);
+        List<String> roles = new ArrayList<>(List.of("ROLE_USER"));
+        roles.add("ROLE_ADMIN");
+        String token = jwtHelper.generateToken(id, email, username, roles );
 
         assertFalse(token.isBlank());
         assertNotNull(token);
@@ -60,8 +67,14 @@ class JwtHelperTest {
 
     @Test
     void expiredJwt() throws InterruptedException {
-        this.jwtConfig.setExpirationTime(1); 
-        String token = jwtHelper.generateToken(UUID.randomUUID(), "amogus67");
+        Duration exp = Duration.ofMillis(1);
+        this.jwtConfig.setExpirationTime(exp); 
+        String token = jwtHelper.generateToken(
+                UUID.randomUUID(), 
+                "amogus67", 
+                "amogus67@gmail.com", 
+                new ArrayList<>()
+                );
         Thread.sleep(100); 
         assertThrows(ExpiredJwtException.class, () -> jwtHelper.parseToken("Bearer " + token));
     }

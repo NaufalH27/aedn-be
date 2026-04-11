@@ -8,5 +8,5 @@ import lombok.Getter;
 public class JwtUserPrincipal {
     private String id;
     private String username;
-    // private String email;
+    private String email;
 }
