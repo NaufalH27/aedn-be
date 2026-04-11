@@ -3,8 +3,9 @@ package com.aedn.service;
 
 import java.security.SecureRandom;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.Base64;
-import java.util.UUID;
+import java.util.List;
 
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -39,6 +40,8 @@ public class AuthService {
     private static final SecureRandom secureRandom = new SecureRandom();
     private static final Base64.Encoder base64Encoder = Base64.getUrlEncoder().withoutPadding();
 
+
+    // TODO : Create email verification flow
     public UserDto createUser(SignUpDto form) {
         if (userRepository.existsByUsername(form.getUsername())) {
             throw new UserCreationException("Username already taken");
@@ -72,7 +75,7 @@ public class AuthService {
             throw new UserLoginException("Invalid Credentials");
         }
 
-        return generateToken(user.getId(), user.getUsername());
+        return generateToken(user);
     }
 
     public TokenDto refreshToken(RefreshTokenDto refreshToken) {
@@ -85,23 +88,44 @@ public class AuthService {
         User user = userRepository.findById(currToken.getUserId())
             .orElseThrow(() -> new UserRefreshTokenException("Invalid Session"));
         refreshTokenRepository.delete(currToken);
-        return generateToken(user.getId(), user.getUsername());
+        return generateToken(user);
     
     }
 
-    private TokenDto generateToken(UUID userId, String username) {
+    private TokenDto generateToken(User user) {
         byte[] randomBytes = new byte[32];
         secureRandom.nextBytes(randomBytes);
         String base64token = base64Encoder.encodeToString(randomBytes);
-        String jwtToken = jwtHelper.generateToken(userId, username);
-        Instant expiration = Instant.now().plus(jwtConfig.getRefreshTokenExpirationTime());
 
-        RefreshToken refreshToken = refreshTokenRepository.save(new RefreshToken(base64token, userId, expiration));
+        List<String> roles = new ArrayList<>(List.of("ROLE_USER"));
+        if (Boolean.TRUE.equals(user.getIsAdmin())) {
+            roles.add("ROLE_ADMIN");
+        }
+        
+        String jwtToken = jwtHelper.generateToken(user.getId(), user.getUsername(), user.getEmail(), roles);
+        Instant expiration = Instant.now().plus(jwtConfig.getRefreshTokenExpirationTime());
+        RefreshToken refreshToken = refreshTokenRepository.save(new RefreshToken(base64token, user.getId(), expiration));
         return new TokenDto(jwtToken, refreshToken.getToken());
     }
 
     private boolean compareBcrypt(String plain, String hashed) {
         return encoder.matches(plain, hashed);
+    }
+
+    public void createAdmin(String username, String email, String password) {
+        if (userRepository.existsByUsername(username)) {
+            throw new UserCreationException("Username already taken");
+        }
+
+        if (userRepository.existsByEmail(email)) {
+            throw new UserCreationException("Email already registered");
+        }
+        
+        String hashedPassword = encoder.encode(password);
+        User user = new User(username, email, hashedPassword);
+        user.setIsAdmin(true);
+
+        userRepository.save(user);
     }
 
 }

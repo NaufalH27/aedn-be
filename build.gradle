@@ -73,3 +73,11 @@ flyway {
     password = getEnv("DB_PASSWORD")
     cleanDisabled = getEnv("FLYWAY_DISABLE_CLEAN").toBoolean()
 }
+
+tasks.register("createAdmin", JavaExec) {
+    dependsOn classes
+    mainClass = "com.aedn.AednCli"
+    classpath = sourceSets.main.runtimeClasspath
+    args "createAdmin"
+    standardInput = System.in
+}
