@@ -16,6 +16,7 @@ public class ProductDto {
     private String title;
     private long price;
     private String urlSlug;
+    private String shortlink;
     private int quantity;
     private String currencyCode;
     private List<String> pictureUrls;
@@ -29,6 +30,7 @@ public class ProductDto {
         dto.setCurrencyCode(entity.getCurrencyCode());
         dto.setQuantity(entity.getQuantity());
         dto.setUrlSlug(entity.getUrlSlug());
+        dto.setShortlink(entity.getShortlink());
 
         dto.setPictureUrls(
             entity.getPictures() == null ? List.of() :

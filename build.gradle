@@ -37,6 +37,7 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
     implementation "org.flywaydb:flyway-database-postgresql"
     implementation 'io.jsonwebtoken:jjwt-api:0.13.0' 
+    implementation("com.github.slugify:slugify:3.0.7")
     runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.13.0' 
     runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.13.0' 
     compileOnly 'org.projectlombok:lombok'
@@ -74,10 +75,3 @@ flyway {
     cleanDisabled = getEnv("FLYWAY_DISABLE_CLEAN").toBoolean()
 }
 
-tasks.register("createAdmin", JavaExec) {
-    dependsOn classes
-    mainClass = "com.aedn.AednCli"
-    classpath = sourceSets.main.runtimeClasspath
-    args "createAdmin"
-    standardInput = System.in
-}

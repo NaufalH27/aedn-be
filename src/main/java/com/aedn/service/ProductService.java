@@ -5,12 +5,15 @@ import java.util.List;
 
 import org.springframework.stereotype.Service;
 
+import com.aedn.common.Base62Encoder;
 import com.aedn.dto.CreateProductDto;
 import com.aedn.dto.EditProductDto;
 import com.aedn.dto.ProductDto;
 import com.aedn.entity.Product;
 import com.aedn.entity.ProductPicture;
 import com.aedn.repository.ProductRepository;
+
+import com.github.slugify.Slugify;
 
 import lombok.RequiredArgsConstructor;
 
@@ -19,6 +22,7 @@ import lombok.RequiredArgsConstructor;
 public class ProductService {
 
     private final ProductRepository productRepository;
+    final Slugify slg = Slugify.builder().build();
 
     public ProductDto createProduct(CreateProductDto dto) {
         Product product = new Product();
@@ -28,9 +32,6 @@ public class ProductService {
         product.setPrice(dto.getPrice());
         product.setQuantity(dto.getQuantity());
 
-        // TODO: generate slug
-        product.setUrlSlug(null);
-
         List<ProductPicture> pictures = new ArrayList<>();
         for (int i = 0; i < dto.getPictureUrls().size(); i++) {
             ProductPicture pic = new ProductPicture();
@@ -39,10 +40,14 @@ public class ProductService {
             pic.setUrl(dto.getPictureUrls().get(i));
             pictures.add(pic);
         }
-
         product.setPictures(pictures);
-        Product savedProduct = productRepository.save(product);
-        return ProductDto.fromEntity(savedProduct);
+
+        Product flushedProduct = productRepository.saveAndFlush(product);
+        String shortlink = Base62Encoder.encode(flushedProduct.getId());
+        String slug = slg.slugify(flushedProduct.getTitle()) + "-" + shortlink;
+        flushedProduct.setShortlink(shortlink);
+        flushedProduct.setUrlSlug(slug);
+        return ProductDto.fromEntity(productRepository.save(flushedProduct));
     }
 
     public List<ProductDto> getAllProducts() {
@@ -51,6 +56,7 @@ public class ProductService {
             .map(product -> ProductDto.fromEntity(product))
             .toList();
     }
+
 
     public ProductDto editProduct(EditProductDto dto) {
         return null;

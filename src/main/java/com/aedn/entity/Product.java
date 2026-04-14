@@ -28,6 +28,8 @@ public class Product {
     @Column(nullable=false)
     private String currencyCode;
 
+    private String shortlink;
+
     @Column(nullable=false)
     private String title;
 
