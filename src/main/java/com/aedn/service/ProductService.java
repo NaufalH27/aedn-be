@@ -6,6 +6,7 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 
 import com.aedn.dto.CreateProductDto;
+import com.aedn.dto.EditProductDto;
 import com.aedn.dto.ProductDto;
 import com.aedn.entity.Product;
 import com.aedn.entity.ProductPicture;
@@ -51,12 +52,11 @@ public class ProductService {
             .toList();
     }
 
-    public Object editProduct() {
+    public ProductDto editProduct(EditProductDto dto) {
         return null;
     }
 
-    public Object deleteProduct() {
-        return null;
+    public void deleteProduct(Long id) {
     }
 
 
