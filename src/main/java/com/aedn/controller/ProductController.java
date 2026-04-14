@@ -37,10 +37,10 @@ public class ProductController {
         return ResponseEntity.ok(ApiResponse.success("Get Product Success", productService.getAllProducts()));
     }
 
-    @PutMapping("/products")
+    @PutMapping("/products/{id}")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<ApiResponse<ProductDto>> editProduct(@RequestBody EditProductDto dto) {
-        return ResponseEntity.ok(ApiResponse.success("Edit Product Success", productService.editProduct(dto)));
+    public ResponseEntity<ApiResponse<ProductDto>> editProduct(@PathVariable Long id, @RequestBody EditProductDto dto) {
+        return ResponseEntity.ok(ApiResponse.success("Edit Product Success", productService.editProduct(id, dto)));
     }
 
     @DeleteMapping("/products/{id}")

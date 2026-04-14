@@ -7,7 +7,6 @@ import java.util.List;
 @Getter
 @Setter
 public class EditProductDto {
-    long id;
     private String title;
     private Long price;
     private String currencyCode;
