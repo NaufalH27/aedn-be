@@ -15,6 +15,7 @@ import org.springframework.web.servlet.NoHandlerFoundException;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 import com.aedn.common.ApiResponse;
+import com.aedn.entity.Product;
 
 import io.jsonwebtoken.JwtException;
 
@@ -147,5 +148,15 @@ public class GlobalExceptionHandler {
                 e.getMessage()
         );
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+    }
+
+    @ExceptionHandler(ProductNotFoundException.class)
+    public ResponseEntity<ApiResponse<Object>> handleProductNotFound(ProductNotFoundException e) {
+        ApiResponse<Object> response = ApiResponse.failure(
+                "Product not found",
+                "PRODUCT_NOT_FOUND",
+                e.getMessage()
+        );
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
     }
 }
