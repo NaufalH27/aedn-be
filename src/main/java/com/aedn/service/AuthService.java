@@ -87,7 +87,8 @@ public class AuthService {
         }
         User user = userRepository.findById(currToken.getUserId())
             .orElseThrow(() -> new UserRefreshTokenException("Invalid Session"));
-        refreshTokenRepository.delete(currToken);
+        refreshTokenRepository.findByToken(currToken.getToken())
+            .ifPresent(refreshTokenRepository::delete);
         return generateToken(user);
     
     }
