@@ -97,6 +97,9 @@ public class ProductService {
     }
 
     public void deleteProduct(Long id) {
+        Product product = productRepository.findById(id)
+            .orElseThrow(() -> new ProductNotFoundException("Product not found or already deleted"));
+        productRepository.delete(product);
     }
 
     private List<ProductPicture> insertProductPictures(List<String> pictureUrls, Product product) {
