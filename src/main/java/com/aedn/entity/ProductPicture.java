@@ -1,7 +1,6 @@
 package com.aedn.entity;
 
 import java.time.Instant;
-import java.util.UUID;
 
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -18,7 +17,8 @@ import lombok.Setter;
 public class ProductPicture {
 
     @Id
-    private UUID id = UUID.randomUUID();
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "product_id", nullable = false)

@@ -1,7 +1,10 @@
 package com.aedn.dto;
 
+import java.time.Instant;
 import java.util.List;
+import java.util.UUID;
 
+import com.aedn.entity.Category;
 import com.aedn.entity.Product;
 import com.aedn.entity.ProductPicture;
 
@@ -16,9 +19,11 @@ public class ProductDto {
     private String title;
     private long price;
     private String urlSlug;
-    private String shortlink;
     private int quantity;
+    private CategoryDto category;
     private String currencyCode;
+    private Instant createdAt;
+    private Boolean isActive;
     private List<String> pictureUrls;
 
     public static ProductDto fromEntity(Product entity) {
@@ -30,7 +35,8 @@ public class ProductDto {
         dto.setCurrencyCode(entity.getCurrencyCode());
         dto.setQuantity(entity.getQuantity());
         dto.setUrlSlug(entity.getUrlSlug());
-        dto.setShortlink(entity.getShortlink());
+        dto.setCategory(CategoryDto.fronEmtity(entity.getCategory()));
+        dto.setIsActive(entity.getIsActive());
 
         dto.setPictureUrls(
             entity.getPictures() == null ? List.of() :
@@ -40,6 +46,20 @@ public class ProductDto {
                     .toList()
             );
 
+        return dto;
+    }
+}
+
+@Getter
+@Setter
+class CategoryDto {
+    private String name;
+    private Long id;
+
+    public static CategoryDto fronEmtity(Category entity) {
+        CategoryDto dto = new CategoryDto();
+        dto.setId(entity.getId());
+        dto.setName(entity.getName());
         return dto;
     }
 }

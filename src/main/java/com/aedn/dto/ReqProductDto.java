@@ -6,11 +6,12 @@ import java.util.List;
 
 @Getter
 @Setter
-public class CreateProductDto {
+public class ReqProductDto {
     private String title;
     private long price;
     private String currencyCode;
     private String description;
     private int quantity;
+    private String categoryName;
     private List<String> pictureUrls;
 }

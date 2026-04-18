@@ -15,7 +15,6 @@ import org.springframework.web.servlet.NoHandlerFoundException;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 import com.aedn.common.ApiResponse;
-import com.aedn.entity.Product;
 
 import io.jsonwebtoken.JwtException;
 
@@ -115,6 +114,16 @@ public class GlobalExceptionHandler {
         ApiResponse<Object> response = ApiResponse.failure(
                 "User login failed",
                 "USER_LOGIN_ERROR",
+                e.getMessage()
+        );
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+    }
+
+    @ExceptionHandler(UserNotFoundException.class)
+    public ResponseEntity<ApiResponse<Object>> handleUserNotFound(UserNotFoundException e) {
+        ApiResponse<Object> response = ApiResponse.failure(
+                "User not found",
+                "USER_NOT_FOUND",
                 e.getMessage()
         );
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);

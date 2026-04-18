@@ -9,6 +9,8 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import lombok.Getter;
 import lombok.Setter;
@@ -17,7 +19,7 @@ import lombok.Setter;
 @Setter
 @Entity
 public class Product {
-    
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -28,21 +30,28 @@ public class Product {
     @Column(nullable=false)
     private String currencyCode;
 
-    private String shortlink;
-
     @Column(nullable=false)
     private String title;
 
     private String description;
+    private String urlSlug;
     
     @Column(nullable=false)
     private int quantity;
 
     private Instant createdAt = Instant.now();
+
     private Boolean isActive = true;
-    private String urlSlug;
 
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ProductPicture> pictures;
+
+    @ManyToOne
+    @JoinColumn(name = "category_id")
+    private Category category;
+
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "user_id")
+    private User user;
 
 }
