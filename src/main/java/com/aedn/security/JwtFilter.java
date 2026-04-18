@@ -3,6 +3,7 @@ package com.aedn.security;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Component;
@@ -46,7 +47,8 @@ public class JwtFilter extends OncePerRequestFilter {
             try {
                 Claims claims = jwtHelper.parseToken(token);
 
-                String userId = claims.getSubject();
+                // will throw IllegalArgumentException if failed
+                UUID userId = UUID.fromString(claims.getSubject());
                 String email = claims.get("email", String.class);
                 String username = claims.get("username", String.class);
                 Object rolesObj = claims.get("roles");
@@ -72,7 +74,7 @@ public class JwtFilter extends OncePerRequestFilter {
 
                 SecurityContext securityContext = SecurityContextHolder.getContext();
                 securityContext.setAuthentication(authentication);
-            } catch(JwtException e) {
+            } catch(JwtException | IllegalArgumentException e) {
                 handlerExceptionResolver.resolveException(request, response, null, e);
                 return;
             }

@@ -119,6 +119,16 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
     }
 
+    @ExceptionHandler(UserNotFoundException.class)
+    public ResponseEntity<ApiResponse<Object>> handleUserNotFound(UserNotFoundException e) {
+        ApiResponse<Object> response = ApiResponse.failure(
+                "User not found",
+                "USER_NOT_FOUND",
+                e.getMessage()
+        );
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+    }
+
     @ExceptionHandler(AuthorizationDeniedException.class)
     public ResponseEntity<ApiResponse<Object>> handleAccessDenied(AuthorizationDeniedException e) {
         ApiResponse<Object> response = ApiResponse.failure(
@@ -147,5 +157,15 @@ public class GlobalExceptionHandler {
                 e.getMessage()
         );
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+    }
+
+    @ExceptionHandler(ProductNotFoundException.class)
+    public ResponseEntity<ApiResponse<Object>> handleProductNotFound(ProductNotFoundException e) {
+        ApiResponse<Object> response = ApiResponse.failure(
+                "Product not found",
+                "PRODUCT_NOT_FOUND",
+                e.getMessage()
+        );
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
     }
 }
