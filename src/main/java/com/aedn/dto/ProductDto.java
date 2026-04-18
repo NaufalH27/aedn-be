@@ -2,7 +2,6 @@ package com.aedn.dto;
 
 import java.time.Instant;
 import java.util.List;
-import java.util.UUID;
 
 import com.aedn.entity.Category;
 import com.aedn.entity.Product;
@@ -37,6 +36,7 @@ public class ProductDto {
         dto.setUrlSlug(entity.getUrlSlug());
         dto.setCategory(CategoryDto.fronEmtity(entity.getCategory()));
         dto.setIsActive(entity.getIsActive());
+        dto.setCreatedAt(entity.getCreatedAt());
 
         dto.setPictureUrls(
             entity.getPictures() == null ? List.of() :

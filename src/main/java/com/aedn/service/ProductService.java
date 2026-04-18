@@ -62,6 +62,7 @@ public class ProductService {
     }
 
 
+    @Transactional
     public ProductDto editProduct(UUID userId, Long productId, ReqProductDto dto) {
         User user = userRepository.findById(userId)
             .orElseThrow(() -> new UserNotFoundException("User Not Found, User might be already deleted or your session is invalid"));
@@ -69,7 +70,7 @@ public class ProductService {
         Product product = productRepository.findById(productId)
             .orElseThrow(() -> new ProductNotFoundException("Product Not Found"));
 
-        if (product.getUser().getId() != user.getId()) {
+        if (!product.getUser().getId().equals(user.getId())) {
             throw new AuthorizationDeniedException("Unauthorized, this resource belong to others");
         }
 
@@ -78,9 +79,21 @@ public class ProductService {
         product.setDescription(dto.getDescription());
         product.setPrice(dto.getPrice());
         product.setQuantity(dto.getQuantity());
-        product.setPictures(insertProductPictures(dto.getPictureUrls(), product));
-        product.setCategory(getCategory(dto.getCategoryName(), user));
-        return ProductDto.fromEntity(productRepository.save(product));
+        product.getPictures().clear();
+        productRepository.flush();
+        product.getPictures().addAll(insertProductPictures(dto.getPictureUrls(), product));
+
+        String shortlink = Base62Encoder.encode(product.getId());
+        String slug = slg.slugify(dto.getTitle()) + "-" + shortlink;
+        product.setUrlSlug(slug);
+        Category oldCategory = product.getCategory();
+        Category newCategory = getCategory(dto.getCategoryName(), user);
+        product.setCategory(newCategory);
+        if (!newCategory.getId().equals(oldCategory.getId()) && !productRepository.existsByCategory(oldCategory)) {
+            categoryRepository.findById(oldCategory.getId())
+                .ifPresent(categoryRepository::delete);
+        }
+        return ProductDto.fromEntity(product);
     }
 
     public void deleteProduct(Long id) {

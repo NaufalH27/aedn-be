@@ -13,4 +13,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
 @Repository
 public interface CategoryRepository extends JpaRepository<Category, UUID> {
     Optional<Category> findByNameAndUser(String name, User user);
+    Optional<Category> findById(Long id);
 }
