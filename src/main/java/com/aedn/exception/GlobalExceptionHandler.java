@@ -1,5 +1,7 @@
 package com.aedn.exception;
 
+import java.util.List;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -9,6 +11,7 @@ import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.security.authorization.AuthorizationDeniedException;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.servlet.NoHandlerFoundException;
@@ -32,6 +35,34 @@ public class GlobalExceptionHandler {
                 e.getMessage()
         );
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+    }
+
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<ApiResponse<Object>> handleValidation(MethodArgumentNotValidException e) {
+
+        List<String> errors = e.getBindingResult()
+            .getFieldErrors()
+            .stream()
+            .map(err -> err.getField() + ": " + err.getDefaultMessage())
+            .toList();
+
+        ApiResponse<Object> response = ApiResponse.failure(
+                "VALIDATION_ERROR",
+                "Invalid request payload",
+                errors
+                );
+
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+    }
+
+    @ExceptionHandler(ObjectStorageUnavailableException.class)
+    public ResponseEntity<ApiResponse<Object>> handleObjStrUnv(ObjectStorageUnavailableException e) {
+        ApiResponse<Object> response = ApiResponse.failure(
+                "Object storage unavailable or out of reach, Please try again later",
+                "OBJ_STORE_UNAVAILABLE",
+                e.getMessage()
+        );
+        return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(response);
     }
 
     @ExceptionHandler(NoHandlerFoundException.class)

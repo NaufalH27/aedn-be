@@ -1,5 +1,7 @@
 package com.aedn.common;
 
+import java.util.List;
+
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -18,6 +20,10 @@ public class ApiResponse<T> {
     }
 
     public static <T> ApiResponse<T> failure(String message, String code, String details) {
+        return new ApiResponse<>(false, message, null, new ErrorInfo(code, List.of(details)));
+    }
+
+    public static <T> ApiResponse<T> failure(String message, String code, List<String> details) {
         return new ApiResponse<>(false, message, null, new ErrorInfo(code, details));
     }
 }
@@ -27,5 +33,6 @@ public class ApiResponse<T> {
 @AllArgsConstructor
 class ErrorInfo {
     private String code;
-    private String details;
+    private List<String> details;
 }
+
