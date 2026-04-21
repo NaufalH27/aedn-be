@@ -5,7 +5,6 @@ import java.util.List;
 
 import com.aedn.entity.Category;
 import com.aedn.entity.Product;
-import com.aedn.entity.ProductPicture;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -26,6 +25,10 @@ public class ProductDto {
     private List<String> pictureUrls;
 
     public static ProductDto fromEntity(Product entity) {
+        return fromEntity(entity, null);
+    }
+
+    public static ProductDto fromEntity(Product entity, String s3Url) {
         ProductDto dto = new ProductDto();
 
         dto.setId(entity.getId());
@@ -38,13 +41,16 @@ public class ProductDto {
         dto.setIsActive(entity.getIsActive());
         dto.setCreatedAt(entity.getCreatedAt());
 
-        dto.setPictureUrls(
-            entity.getPictures() == null ? List.of() :
-                entity.getPictures()
+        if (s3Url == null || entity.getPictures() == null) {
+            dto.setPictureUrls(List.of());
+        } else {
+            dto.setPictureUrls(
+                    entity.getPictures()
                     .stream()
-                    .map(ProductPicture::getUrl)
+                    .map(p -> s3Url + "/" + p.getUrl())
                     .toList()
-            );
+                    );
+        }
 
         return dto;
     }
@@ -57,6 +63,9 @@ class CategoryDto {
     private Long id;
 
     public static CategoryDto fronEmtity(Category entity) {
+        if (entity == null) {
+            return null;
+        }
         CategoryDto dto = new CategoryDto();
         dto.setId(entity.getId());
         dto.setName(entity.getName());

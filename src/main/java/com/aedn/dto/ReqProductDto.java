@@ -14,4 +14,5 @@ public class ReqProductDto {
     private int quantity;
     private String categoryName;
     private List<String> pictureUrls;
+    private Boolean isActive;
 }

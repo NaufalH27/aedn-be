@@ -9,4 +9,5 @@ public class ProductPictureDto {
     private String s3SignedUrl;
     private String filename;
     private String url;
+    private String key;
 }

@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authorization.AuthorizationDeniedException;
 import org.springframework.stereotype.Service;
 
@@ -33,6 +34,9 @@ public class ProductService {
     private final UserRepository userRepository;
     final Slugify slg = Slugify.builder().build();
 
+    @Value("${s3.endpoint.public:}")
+    private String s3Endpoint;
+
     @Transactional
     public ProductDto createProduct(UUID userId, ReqProductDto dto) {
         User user = userRepository.findById(userId)
@@ -51,13 +55,14 @@ public class ProductService {
         product.setUrlSlug(slug);
         product.setPictures(insertProductPictures(dto.getPictureUrls(), product));
         product.setCategory(getCategory(dto.getCategoryName(), user));
-        return ProductDto.fromEntity(productRepository.save(product));
+        product.setIsActive(dto.getIsActive());
+        return createProductDtoFromEntity(productRepository.save(product));
     }
 
     public List<ProductDto> getAllProducts() {
         return productRepository.findAll()
             .stream()
-            .map(product -> ProductDto.fromEntity(product))
+            .map(product -> createProductDtoFromEntity(product))
             .toList();
     }
 
@@ -76,6 +81,7 @@ public class ProductService {
 
         product.setCurrencyCode(dto.getCurrencyCode());
         product.setTitle(dto.getTitle());
+        product.setIsActive(dto.getIsActive());
         product.setDescription(dto.getDescription());
         product.setPrice(dto.getPrice());
         product.setQuantity(dto.getQuantity());
@@ -93,7 +99,7 @@ public class ProductService {
             categoryRepository.findById(oldCategory.getId())
                 .ifPresent(categoryRepository::delete);
         }
-        return ProductDto.fromEntity(product);
+        return createProductDtoFromEntity(product);
     }
 
     public void deleteProduct(Long id) {
@@ -115,6 +121,9 @@ public class ProductService {
     }
 
     private Category getCategory(String categoryName, User user) {
+        if(categoryName == "" || categoryName == null) {
+            return null;
+        }
         return categoryRepository
             .findByNameAndUser(categoryName, user)
             .orElseGet(() -> {
@@ -124,6 +133,13 @@ public class ProductService {
                 return categoryRepository.save(newCategory);
             });
 
+    }
+
+    private ProductDto createProductDtoFromEntity(Product entity) {
+        if (this.s3Endpoint.isBlank()) {
+            return ProductDto.fromEntity(entity);
+        }
+        return ProductDto.fromEntity(entity, this.s3Endpoint);
     }
 
 }

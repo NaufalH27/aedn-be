@@ -3,6 +3,7 @@ package com.aedn.controller;
 import java.util.List;
 import java.util.UUID;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -15,7 +16,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.aedn.common.ApiResponse;
-import com.aedn.config.S3ClientConfig;
 import com.aedn.dto.ProductDto;
 import com.aedn.dto.ProductPictureDto;
 import com.aedn.dto.ReqProductDto;
@@ -25,10 +25,6 @@ import com.aedn.service.ProductService;
 import com.aedn.service.S3Service;
 
 import jakarta.validation.Valid;
-import com.aedn.dto.ProductDto;
-import com.aedn.dto.ReqProductDto;
-import com.aedn.security.JwtUserPrincipal;
-import com.aedn.service.ProductService;
 
 import lombok.RequiredArgsConstructor;
 
@@ -38,6 +34,9 @@ public class ProductController {
 
     private final ProductService productService;
     private final S3Service s3Service;
+    
+    @Value("${s3.endpoint.public:}")
+    private String s3Endpoint;
 
     @PostMapping("/products")
     @PreAuthorize("hasRole('ADMIN')")
@@ -78,15 +77,22 @@ public class ProductController {
         return ResponseEntity.ok(ApiResponse.success("Delete Product Success", null));
     }
 
-    @GetMapping("/product/picture/signed-url/upload")
+    @PostMapping("/product/picture/signed-url/upload")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<ProductPictureDto>> getUploadUrl(@Valid @RequestBody ReqUploadProductPictureDto req) {
         String filename = UUID.randomUUID().toString() + "." + req.getImageExtension();
         ProductPictureDto productUrl = new ProductPictureDto();
 
-        productUrl.setS3SignedUrl(s3Service.generateUploadUrl("public", "product/" + filename));
+        productUrl.setS3SignedUrl(s3Service.generateUploadUrl("public", "product/" + filename, req.getImageExtension()));
+
+        if (this.s3Endpoint.isBlank()) {
+            return ResponseEntity.ok(ApiResponse.failure("Signed Url Generation Failed", "S3_SIGNED_FAILED", "Unconfigurable object storage public endpoint"));
+            
+
+        }
         productUrl.setFilename(filename);
-        productUrl.setUrl("product/" + filename);
+        productUrl.setUrl(s3Endpoint + "/product/" + filename);
+        productUrl.setKey("product/" + filename);
 
         return ResponseEntity.ok(ApiResponse.success("Signed Url Generation Success", productUrl));
     }
