@@ -50,8 +50,8 @@ public class ProductService {
         product.setUser(user);
         product.setQuantity(dto.getQuantity());
         product = productRepository.save(product);
-        String shortlink = Base62Encoder.encode(product.getId());
-        String slug = slg.slugify(dto.getTitle()) + "-" + shortlink;
+        String shortId = product.getId().toString().replace("-", "").substring(0, 8);
+        String slug = slg.slugify(dto.getTitle()) + "-" + shortId;
         product.setUrlSlug(slug);
         product.setPictures(insertProductPictures(dto.getPictureUrls(), product));
         product.setCategory(getCategory(dto.getCategoryName(), user));
@@ -66,9 +66,14 @@ public class ProductService {
             .toList();
     }
 
+    public ProductDto getById(UUID id) {
+        Product product = productRepository.findById(id).orElseThrow(() -> new ProductNotFoundException("Product Not Found"));
+        return createProductDtoFromEntity(product);
+    }
+
 
     @Transactional
-    public ProductDto editProduct(UUID userId, Long productId, ReqProductDto dto) {
+    public ProductDto editProduct(UUID userId, UUID productId, ReqProductDto dto) {
         User user = userRepository.findById(userId)
             .orElseThrow(() -> new UserNotFoundException("User Not Found, User might be already deleted or your session is invalid"));
 
@@ -89,20 +94,25 @@ public class ProductService {
         productRepository.flush();
         product.getPictures().addAll(insertProductPictures(dto.getPictureUrls(), product));
 
-        String shortlink = Base62Encoder.encode(product.getId());
-        String slug = slg.slugify(dto.getTitle()) + "-" + shortlink;
+        String shortId = product.getId().toString().replace("-", "").substring(0, 8);
+        String slug = slg.slugify(dto.getTitle()) + "-" + shortId;
         product.setUrlSlug(slug);
         Category oldCategory = product.getCategory();
         Category newCategory = getCategory(dto.getCategoryName(), user);
         product.setCategory(newCategory);
-        if (!newCategory.getId().equals(oldCategory.getId()) && !productRepository.existsByCategory(oldCategory)) {
-            categoryRepository.findById(oldCategory.getId())
-                .ifPresent(categoryRepository::delete);
+        if (oldCategory != null && !productRepository.existsByCategory(oldCategory)) {
+            if(newCategory == null) {
+                categoryRepository.findById(oldCategory.getId())
+                    .ifPresent(categoryRepository::delete);
+            } else if (newCategory != null && !newCategory.getId().equals(oldCategory.getId())) {
+                categoryRepository.findById(oldCategory.getId())
+                    .ifPresent(categoryRepository::delete);
+            }
         }
         return createProductDtoFromEntity(product);
     }
 
-    public void deleteProduct(Long id) {
+    public void deleteProduct(UUID id) {
         Product product = productRepository.findById(id)
             .orElseThrow(() -> new ProductNotFoundException("Product not found or already deleted"));
         productRepository.delete(product);

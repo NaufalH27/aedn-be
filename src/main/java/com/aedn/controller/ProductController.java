@@ -56,7 +56,7 @@ public class ProductController {
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<ProductDto>> editProduct(
         @AuthenticationPrincipal JwtUserPrincipal user,
-        @PathVariable Long id,
+        @PathVariable UUID id,
         @RequestBody ReqProductDto dto
       ) {
 
@@ -68,14 +68,20 @@ public class ProductController {
             );
         }
 
+    @GetMapping("/products/{id}")
+    public ResponseEntity<ApiResponse<ProductDto>> getProductById(@PathVariable UUID id) {
+        return ResponseEntity.ok(ApiResponse.success("Get Product Success", productService.getById(id)));
+    }
+
     @DeleteMapping("/products/{id}")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<ApiResponse<Void>> deleteProduct(@PathVariable Long id) {
+    public ResponseEntity<ApiResponse<Void>> deleteProduct(@PathVariable UUID id) {
 
         productService.deleteProduct(id);
 
         return ResponseEntity.ok(ApiResponse.success("Delete Product Success", null));
     }
+
 
     @PostMapping("/product/picture/signed-url/upload")
     @PreAuthorize("hasRole('ADMIN')")

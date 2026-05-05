@@ -2,6 +2,7 @@ package com.aedn.dto;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.UUID;
 
 import com.aedn.entity.Category;
 import com.aedn.entity.Product;
@@ -13,13 +14,14 @@ import lombok.Setter;
 @Setter
 public class ProductDto {
 
-    private Long id;
+    private UUID id;
     private String title;
     private long price;
     private String urlSlug;
     private int quantity;
     private CategoryDto category;
     private String currencyCode;
+    private String description;
     private Instant createdAt;
     private Boolean isActive;
     private List<String> pictureUrls;
@@ -40,6 +42,7 @@ public class ProductDto {
         dto.setCategory(CategoryDto.fronEmtity(entity.getCategory()));
         dto.setIsActive(entity.getIsActive());
         dto.setCreatedAt(entity.getCreatedAt());
+        dto.setDescription(entity.getDescription());
 
         if (s3Url == null || entity.getPictures() == null) {
             dto.setPictureUrls(List.of());
