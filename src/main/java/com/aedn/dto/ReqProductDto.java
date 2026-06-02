@@ -11,7 +11,6 @@ public class ReqProductDto {
     private long price;
     private String currencyCode;
     private String description;
-    private int quantity;
     private String categoryName;
     private List<String> pictureUrls;
     private Boolean isActive;

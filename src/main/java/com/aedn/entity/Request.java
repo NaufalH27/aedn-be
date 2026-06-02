@@ -36,16 +36,13 @@ public class Request {
     @Column(nullable = false)
     private String email;
 
-    private String status; // pending, proposed, rejected
+    private String status = "pending";
 
     @Column(name = "extra_info")
     private String extraInfo;
 
     @Column(name = "created_at")
     private Instant createdAt = Instant.now();
-
-    @Column(name = "product_title")
-    private String productTitle;
 
     @Column(name = "proposed_price")
     private Long proposedPrice;

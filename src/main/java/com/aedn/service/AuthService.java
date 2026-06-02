@@ -1,6 +1,8 @@
 package com.aedn.service;
 
 
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -18,13 +20,14 @@ import com.aedn.dto.TokenDto;
 import com.aedn.dto.UserDto;
 import com.aedn.entity.RefreshToken;
 import com.aedn.entity.User;
+import com.aedn.exception.InvalidRefreshTokenException;
 import com.aedn.exception.UserCreationException;
 import com.aedn.exception.UserLoginException;
-import com.aedn.exception.UserRefreshTokenException;
 import com.aedn.repository.RefreshTokenRepository;
 import com.aedn.repository.UserRepository;
 import com.aedn.security.JwtHelper;
 
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -39,6 +42,7 @@ public class AuthService {
 
     private static final SecureRandom secureRandom = new SecureRandom();
     private static final Base64.Encoder base64Encoder = Base64.getUrlEncoder().withoutPadding();
+    private static final Base64.Decoder base64Decoder = Base64.getUrlDecoder();
 
 
     // TODO : Create email verification flow
@@ -59,7 +63,7 @@ public class AuthService {
         return UserDto.fromEntity(savedUser);
     }
 
-    public TokenDto login(LoginDto form) {
+    public TokenDto login(LoginDto form) throws NoSuchAlgorithmException {
         User user;
         if (form.getLoginMethod().equals("email")) { 
             user = userRepository.findByEmail(form.getEmail())
@@ -74,26 +78,6 @@ public class AuthService {
         if (!compareBcrypt(form.getPassword(), user.getPassword())) {
             throw new UserLoginException("Invalid Credentials");
         }
-
-        return generateToken(user);
-    }
-
-    public TokenDto refreshToken(RefreshTokenDto refreshToken) {
-        RefreshToken currToken = refreshTokenRepository.findByToken(refreshToken.getToken())
-            .orElseThrow(() -> new UserRefreshTokenException("Invalid Session"));
-        if (Instant.now().isAfter(currToken.getExpiresAt())){
-            refreshTokenRepository.delete(currToken);
-            throw new UserRefreshTokenException("Session Expired");
-        }
-        User user = userRepository.findById(currToken.getUserId())
-            .orElseThrow(() -> new UserRefreshTokenException("Invalid Session"));
-        refreshTokenRepository.findByToken(currToken.getToken())
-            .ifPresent(refreshTokenRepository::delete);
-        return generateToken(user);
-    
-    }
-
-    private TokenDto generateToken(User user) {
         byte[] randomBytes = new byte[32];
         secureRandom.nextBytes(randomBytes);
         String base64token = base64Encoder.encodeToString(randomBytes);
@@ -105,8 +89,47 @@ public class AuthService {
         
         String jwtToken = jwtHelper.generateToken(user.getId(), user.getUsername(), user.getEmail(), roles);
         Instant expiration = Instant.now().plus(jwtConfig.getRefreshTokenExpirationTime());
-        RefreshToken refreshToken = refreshTokenRepository.save(new RefreshToken(base64token, user.getId(), expiration));
-        return new TokenDto(jwtToken, refreshToken.getToken());
+        RefreshToken refreshToken = refreshTokenRepository.save(new RefreshToken(bytesToSha256HexString(randomBytes), user.getId(), expiration));
+        return new TokenDto(jwtToken, RefreshTokenDto.fromEntity(refreshToken, base64token));
+    }
+
+    @Transactional
+    public TokenDto refreshToken(String token) throws NoSuchAlgorithmException {
+        byte[] byteToken = base64Decoder.decode(token); 
+        RefreshToken refreshToken = refreshTokenRepository.findByToken(bytesToSha256HexString(byteToken))
+            .orElseThrow(() -> new InvalidRefreshTokenException("Invalid Session, Please Login Again"));
+
+        if (Instant.now().isAfter(refreshToken.getExpiresAt())) {
+            refreshTokenRepository.delete(refreshToken);
+            throw new InvalidRefreshTokenException("Session Expired, Please Login Again");
+        }
+
+        User user = userRepository.findById(refreshToken.getUserId())
+            .orElseThrow(() -> new InvalidRefreshTokenException("Invalid Session, Please Login Again"));
+
+        List<String> roles = new ArrayList<>(List.of("ROLE_USER"));
+        if (Boolean.TRUE.equals(user.getIsAdmin())) {
+            roles.add("ROLE_ADMIN");
+        }
+        
+        String jwtToken = jwtHelper.generateToken(user.getId(), user.getUsername(), user.getEmail(), roles);
+        Instant expiration = Instant.now().plus(jwtConfig.getRefreshTokenExpirationTime());
+        refreshToken.setExpiresAt(expiration);
+        refreshTokenRepository.save(refreshToken);
+        return new TokenDto(jwtToken, RefreshTokenDto.fromEntity(refreshToken, token));
+    }
+
+    private String bytesToSha256HexString(byte[] bytes) throws NoSuchAlgorithmException {
+        MessageDigest digest = MessageDigest.getInstance("SHA-256");
+        byte[] hashByte = digest.digest(bytes);
+
+        StringBuilder sb = new StringBuilder();
+
+        for (byte b: hashByte) {
+            sb.append(String.format("%02x", b));
+        }
+
+        return sb.toString();
     }
 
     private boolean compareBcrypt(String plain, String hashed) {

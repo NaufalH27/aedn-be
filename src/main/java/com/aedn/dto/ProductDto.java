@@ -4,9 +4,6 @@ import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 
-import com.aedn.entity.Category;
-import com.aedn.entity.Product;
-
 import lombok.Getter;
 import lombok.Setter;
 
@@ -24,54 +21,7 @@ public class ProductDto {
     private String description;
     private Instant createdAt;
     private Boolean isActive;
+    private Boolean isDeleted;
     private List<String> pictureUrls;
-
-    public static ProductDto fromEntity(Product entity) {
-        return fromEntity(entity, null);
-    }
-
-    public static ProductDto fromEntity(Product entity, String s3Url) {
-        ProductDto dto = new ProductDto();
-
-        dto.setId(entity.getId());
-        dto.setTitle(entity.getTitle());
-        dto.setPrice(entity.getPrice());
-        dto.setCurrencyCode(entity.getCurrencyCode());
-        dto.setQuantity(entity.getQuantity());
-        dto.setUrlSlug(entity.getUrlSlug());
-        dto.setCategory(CategoryDto.fronEmtity(entity.getCategory()));
-        dto.setIsActive(entity.getIsActive());
-        dto.setCreatedAt(entity.getCreatedAt());
-        dto.setDescription(entity.getDescription());
-
-        if (s3Url == null || entity.getPictures() == null) {
-            dto.setPictureUrls(List.of());
-        } else {
-            dto.setPictureUrls(
-                    entity.getPictures()
-                    .stream()
-                    .map(p -> s3Url + "/" + p.getUrl())
-                    .toList()
-                    );
-        }
-
-        return dto;
-    }
 }
 
-@Getter
-@Setter
-class CategoryDto {
-    private String name;
-    private Long id;
-
-    public static CategoryDto fronEmtity(Category entity) {
-        if (entity == null) {
-            return null;
-        }
-        CategoryDto dto = new CategoryDto();
-        dto.setId(entity.getId());
-        dto.setName(entity.getName());
-        return dto;
-    }
-}

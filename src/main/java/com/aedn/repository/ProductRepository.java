@@ -1,6 +1,7 @@
 
 package com.aedn.repository;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -13,7 +14,9 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 @Repository
 public interface ProductRepository extends JpaRepository<Product, UUID> {
+    List<Product> findByIsDeletedFalse();
     Optional<Product> findById(UUID id);
+    Optional<Product> findByIdAndIsDeletedFalse(UUID id);
     boolean existsByCategory(Category category);
     Optional<Product> findByUrlSlug(String urlSlug);
 }

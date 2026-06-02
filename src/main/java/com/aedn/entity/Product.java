@@ -13,6 +13,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.OrderBy;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -42,10 +43,13 @@ public class Product {
     private int quantity;
 
     private Instant createdAt = Instant.now();
+    private Instant deletedAt;
 
     private Boolean isActive = true;
+    private Boolean isDeleted = false;
 
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OrderBy("position ASC")
     private List<ProductPicture> pictures;
 
     @ManyToOne

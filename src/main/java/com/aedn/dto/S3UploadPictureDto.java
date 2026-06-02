@@ -5,7 +5,7 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class ProductPictureDto {
+public class S3UploadPictureDto {
     private String s3SignedUrl;
     private String filename;
     private String url;

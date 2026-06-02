@@ -7,7 +7,7 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class ReqUploadProductPictureDto {
+public class S3UploadPictureRequestDto {
     @Pattern(
     regexp = "^(?i)(png|jpg|jpeg|gif|webp|bmp|tiff|avif)$",
     message = "Invalid image extension, currently supported extension are: png, jpg, jpeg, gif, webp, bmp, tiff, avif"

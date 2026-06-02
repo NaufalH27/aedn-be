@@ -1,6 +1,5 @@
 package com.aedn.dto;
 
-import com.aedn.entity.Request;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -13,7 +12,7 @@ public class RequestDto {
 
     private UUID id;
     private String requestNumberId;
-    private UUID productId;
+    private ProductDto product;
     private String currencyCode;
     private Instant proposedDeadline;
     private String username;
@@ -21,33 +20,8 @@ public class RequestDto {
     private String status;
     private String extraInfo;
     private Instant createdAt;
-    private String productTitle;
     private Long proposedPrice;
-
-    public static RequestDto fromEntity(Request request) {
-        if (request == null) {
-            return null;
-        }
-
-        RequestDto dto = new RequestDto();
-
-        dto.setId(request.getId());
-        dto.setRequestNumberId(request.getRequestNumberId());
-
-        if (request.getProduct() != null) {
-            dto.setProductId(request.getProduct().getId());
-        }
-
-        dto.setCurrencyCode(request.getCurrencyCode());
-        dto.setProposedDeadline(request.getProposedDeadline());
-        dto.setUsername(request.getUsername());
-        dto.setEmail(request.getEmail());
-        dto.setStatus(request.getStatus());
-        dto.setExtraInfo(request.getExtraInfo());
-        dto.setCreatedAt(request.getCreatedAt());
-        dto.setProductTitle(request.getProductTitle());
-        dto.setProposedPrice(request.getProposedPrice());
-
-        return dto;
-    }
+    UserDto user;
+    RequestOrderSummaryDto orderSummary;
 }
+

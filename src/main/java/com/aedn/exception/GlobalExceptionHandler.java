@@ -12,6 +12,7 @@ import org.springframework.security.authorization.AuthorizationDeniedException;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.MissingRequestCookieException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.servlet.NoHandlerFoundException;
@@ -35,6 +36,20 @@ public class GlobalExceptionHandler {
                 e.getMessage()
         );
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+    }
+
+
+    @ExceptionHandler(BadRequestException.class)
+    public ResponseEntity<ApiResponse<Object>> handleBadRequest(BadRequestException e) {
+
+
+        ApiResponse<Object> response = ApiResponse.failure(
+                "BAD_REQUEST",
+                "Bad Request",
+                e.getMessage()
+                );
+
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
@@ -73,6 +88,16 @@ public class GlobalExceptionHandler {
                 e.getMessage()
         );
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+    }
+
+    @ExceptionHandler(NotFoundException.class)
+    public ResponseEntity<ApiResponse<Object>> handleEntityNotFound(NotFoundException e) {
+        ApiResponse<Object> response = ApiResponse.failure(
+                "Entity Not Found",
+                "ENTITY_NOT_FOUND",
+                e.getMessage()
+        );
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
     }
     
     @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
@@ -115,8 +140,32 @@ public class GlobalExceptionHandler {
 
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(body);
     }
-    @ExceptionHandler(UserRefreshTokenException.class)
-    public ResponseEntity<ApiResponse<Void>> handleRefreshTokenException(UserRefreshTokenException e) {
+
+    @ExceptionHandler(MissingRequestCookieException.class)
+    public ResponseEntity<ApiResponse<Void>> handleMissingCookie(
+            MissingRequestCookieException e
+    ) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(ApiResponse.failure(
+                        "Missing required cookie: " + e.getCookieName(),
+                        "MISSING_COOKIE",
+                        e.getMessage()
+                ));
+    }
+
+    @ExceptionHandler(MissingRefreshTokenException.class)
+    public ResponseEntity<ApiResponse<Void>> handleMissingRefreshTokenException(MissingRefreshTokenException e) {
+        ApiResponse<Void> body = ApiResponse.failure(
+                "Missign Refresh Token",
+                "MISSING_REFRESH_TOKEN",
+                e.getMessage()
+                );
+
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(body);
+    }
+
+    @ExceptionHandler(InvalidRefreshTokenException.class)
+    public ResponseEntity<ApiResponse<Void>> handleInvalidRefreshTokenException(InvalidRefreshTokenException e) {
         ApiResponse<Void> body = ApiResponse.failure(
                 "Invalid Refresh Token",
                 "INVALID_REFRESH_TOKEN",
