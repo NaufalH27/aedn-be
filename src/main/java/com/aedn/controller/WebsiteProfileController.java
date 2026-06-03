@@ -32,6 +32,12 @@ public class WebsiteProfileController {
         return ResponseEntity.ok(ApiResponse.success("Get Profile Success", service.get()));
     }
 
+    @GetMapping("/website-profile/all")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<ApiResponse<WebsiteProfileDto>> getAll() {
+        return ResponseEntity.ok(ApiResponse.success("Get Profile Success", service.getAll()));
+    }
+
     @GetMapping("website-profile/contact")
     @PreAuthorize("hasRole('USER')")
     public ResponseEntity<ApiResponse<ContactInfoDto>> getContact() {

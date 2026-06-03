@@ -14,6 +14,7 @@ public class WebsiteProfileDto {
     String email;
     String instagramUrl;
     String facebookUrl;
+    String whatsappUrl;
     private String vgenUrl;
     private String discordUrl;
     private String twitterUrl;
@@ -29,6 +30,23 @@ public class WebsiteProfileDto {
                 .email(entity.getEmail())
                 .instagramUrl(entity.getInstagramUrl())
                 .facebookUrl(entity.getFacebookUrl())
+                .vgenUrl(entity.getVgenUrl())
+                .discordUrl(entity.getDiscordUrl())
+                .twitterUrl(entity.getTwitterUrl())
+                .build();
+    }
+    public static WebsiteProfileDto fromEntityAll(WebsiteProfile entity) {
+        if (entity == null) {
+            return null;
+        }
+
+        return WebsiteProfileDto.builder()
+                .photoProfile(entity.getPhotoProfile())
+                .personalDescription(entity.getPersonalDescription())
+                .email(entity.getEmail())
+                .instagramUrl(entity.getInstagramUrl())
+                .facebookUrl(entity.getFacebookUrl())
+                .whatsappUrl(entity.getWhatsappUrl())
                 .vgenUrl(entity.getVgenUrl())
                 .discordUrl(entity.getDiscordUrl())
                 .twitterUrl(entity.getTwitterUrl())

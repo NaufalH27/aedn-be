@@ -23,6 +23,13 @@ public class WebsiteProfileService {
         return WebsiteProfileDto.fromEntity(profile);
     }
 
+    public WebsiteProfileDto getAll() {
+        WebsiteProfile profile = websiteProfileRepository.findFirstBy()
+                .orElseThrow(() -> new RuntimeException("Website Profile is Unavailable"));
+
+        return WebsiteProfileDto.fromEntityAll(profile);
+    }
+
     public ContactInfoDto getContact() {
         WebsiteProfile profile = websiteProfileRepository.findFirstBy()
                 .orElseThrow(() -> new RuntimeException("Website Profile is Unavailable"));
